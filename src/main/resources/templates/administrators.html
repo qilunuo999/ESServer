@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:v-bing="http://www.w3.org/1999/xhtml"
+      xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>基于区块链的电子印章系统</title>
+</head>
+<body>
+<div id="vue">
+    <!--导航-->
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-submenu v-for="(menuItem, menuIndex) in menu" :key="menuIndex" :index="menuIndex + ''">
+            <template slot="title">
+                <i :class="menuItem.icon"></i>
+                <span>{{menuItem.title}}</span>
+            </template>
+            <el-menu-item v-for="(submenuItem, submenuIndex) in menuItem.items"
+                          :key="submenuIndex" :index="menuIndex + '-' + submenuIndex"
+                          @click="setActiveIndex(menuIndex, submenuIndex)">{{submenuItem}}
+            </el-menu-item>
+        </el-submenu>
+        <el-menu-item :plain="true" @click="logout">
+            <template slot="title">
+                <i class="el-icon-close"></i>
+                <span>注销</span>
+            </template>
+        </el-menu-item>
+    </el-menu>
+    <!--    &lt;!&ndash;添加部门&ndash;&gt;-->
+    <!--    <div v-if="activeIndex === '0-1'">-->
+    <!--        <el-card class="box-card" style="margin: 10px">-->
+    <!--            <el-form ref="form" label-position="left" label-width="100px">-->
+    <!--                <div v-for="(v,i) in list">-->
+    <!--                    <el-row>-->
+    <!--                        <el-col span="8">-->
+    <!--                            <el-form-item label="组织名称：" class="item">-->
+    <!--                                <el-input v-model="orgInfo.orgName"></el-input>-->
+    <!--                            </el-form-item>-->
+    <!--                        </el-col>-->
+    <!--                        <el-col span="8">-->
+    <!--                            <el-form-item label="节点名称：" class="item">-->
+    <!--                                <el-input v-model="orgInfo.peer"></el-input>-->
+    <!--                            </el-form-item>-->
+    <!--                        </el-col>-->
+    <!--                    </el-row>-->
+    <!--                </div>-->
+    <!--                <el-button type="primary" @click="createButton">添加</el-button>-->
+    <!--                <el-button type="danger" @click="deleteButton" v-if="index !== 0">删除</el-button>-->
+    <!--            </el-form>-->
+    <!--            <div class="deploybtn">-->
+    <!--                <el-button style="margin-top: 12px;" @click="orgSubmission">提交</el-button>-->
+    <!--            </div>-->
+    <!--        </el-card>-->
+    <!--    </div>-->
+    <!--    &lt;!&ndash;配置节点信息&ndash;&gt;-->
+    <!--    <div v-if="activeIndex === '1-0'">-->
+    <!--        <el-card class="box-card" style="margin: 10px">-->
+    <!--            <el-steps :active="active" finish-status="success">-->
+    <!--                <el-step title="步骤1"></el-step>-->
+    <!--                <el-step title="步骤2"></el-step>-->
+    <!--                <el-step title="步骤3"></el-step>-->
+    <!--            </el-steps>-->
+    <!--            <div class="usrInfo" v-if=" active === 0">-->
+    <!--                <el-form ref="form" label-position="left" label-width="100px">-->
+    <!--                    <el-form-item label="密钥：">-->
+    <!--                        <el-input v-model="serverInfo.scriptKey"></el-input>-->
+    <!--                    </el-form-item>-->
+    <!--                    <el-form-item label="区域：">-->
+    <!--                        <el-input v-model="serverInfo.area"></el-input>-->
+    <!--                    </el-form-item>-->
+    <!--                    <el-form-item label="网络id：">-->
+    <!--                        <el-input v-model="serverInfo.clusterId"></el-input>-->
+    <!--                    </el-form-item>-->
+    <!--                </el-form>-->
+    <!--            </div>-->
+    <!--            <div class="usrInfo" v-if=" active === 1">-->
+    <!--                <el-form ref="form" label-position="left" label-width="100px">-->
+    <!--                    <el-form-item label="通道名称：">-->
+    <!--                        <el-input v-model="serverInfo.channelName"></el-input>-->
+    <!--                    </el-form-item>-->
+    <!--                    <el-form-item label="合约名称：">-->
+    <!--                        <el-input v-model="serverInfo.chaincodeName"></el-input>-->
+    <!--                    </el-form-item>-->
+    <!--                </el-form>-->
+    <!--            </div>-->
+    <!--            <div class="usrInfo" v-if=" active === 2">-->
+    <!--                <el-form ref="form" label-position="left" label-width="100px">-->
+    <!--                    <div v-for="(v,i) in list">-->
+    <!--                        <el-row>-->
+    <!--                            <el-col span="8">-->
+    <!--                                <el-form-item label="组织名称：" class="item">-->
+    <!--                                    <el-input v-model="orgInfo.orgName"></el-input>-->
+    <!--                                </el-form-item>-->
+    <!--                            </el-col>-->
+    <!--                            <el-col span="8">-->
+    <!--                                <el-form-item label="节点名称：" class="item">-->
+    <!--                                    <el-input v-model="orgInfo.peer"></el-input>-->
+    <!--                                </el-form-item>-->
+    <!--                            </el-col>-->
+    <!--                        </el-row>-->
+    <!--                    </div>-->
+    <!--                    <el-button type="primary" @click="createButton">添加</el-button>-->
+    <!--                    <el-button type="danger" @click="deleteButton" v-if="index !== 0">删除</el-button>-->
+    <!--                </el-form>-->
+    <!--            </div>-->
+    <!--            <div class="deploybtn">-->
+    <!--                <el-button style="margin-top: 12px;" @click="next" v-if="active === 0 || active === 1">下一步</el-button>-->
+    <!--                <el-button style="margin-top: 12px;" @click="peerSubmission" v-if="active === 2">提交</el-button>-->
+    <!--            </div>-->
+    <!--        </el-card>-->
+    <!--    </div>-->
+    <!--管理员查看用户信息-->
+    <div v-if="activeIndex === '0-0'">
+        <el-card class="box-card" style="margin: 10px">
+            <div slot="header" class="clearfix">
+                <span>用户管理</span>
+            </div>
+            <el-table :data="userTable.items" style="width: 100%">
+                <el-table-column v-for="(colItem) in userTable.cols" :key="colItem.prop"
+                                 :prop="colItem.prop" :label="colItem.label">
+                </el-table-column>
+                <el-table-column fixed="right" label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="medium" @click="setActiveIndex(0, 4, scope.row.email)">修改信息
+                        </el-button>
+                        <el-button type="text" size="medium" @click="setActiveIndex(0, 3, scope.row.email)">初始化密码
+                        </el-button>
+                        <el-button type="text" size="medium" @click="deleteUser(scope.row.email)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+    </div>
+    <!--修改密码-->
+    <div v-if="activeIndex === '0-1'">
+        <el-card class="box-card" style="margin: 10px">
+            <div style="margin: 20px; width: 40%">
+                <el-form ref="form" label-position="left" label-width="100px">
+                    <el-form-item label="姓名:">
+                        <el-input v-model="userInfo.username" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱:">
+                        <el-input v-model="userInfo.email" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="旧密码:">
+                        <el-input v-model="userInfo.oldpassword" placeholder="6-20个非中文字符"
+                                  show-password></el-input>
+                    </el-form-item>
+                    <el-form-item label="新密码:">
+                        <el-input v-model="userInfo.newpassword" placeholder="6-20个非中文字符"
+                                  show-password></el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码:">
+                        <el-input v-model="userInfo.newpassword1" placeholder="6-20个非中文字符"
+                                  show-password></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="danger" @click="changePassword">修改</el-button>
+                        <el-button type="info" @click="lastActiveIndex">返回</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+    <!--添加新用户-->
+    <div v-if="activeIndex === '0-2'">
+        <el-card class="box-card" style="margin: 10px">
+            <div style="margin: 20px; width: 40%">
+                <el-form ref="form" label-position="left" label-width="100px">
+                    <el-form-item label="邮箱：">
+                        <el-input v-model="userInfo.email" placeholder="(4-20个非中文字符)"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码：">
+                        <el-input v-model="userInfo.passwd" placeholder="(6-20个非中文字符)" show-password></el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名：">
+                        <el-input v-model="userInfo.username" placeholder="(10以下中文字符)"></el-input>
+                    </el-form-item>
+                    <el-form-item label="部门：">
+                        <template>
+                            <el-select v-model="userInfo.department" style="width: 100%">
+                                <el-option v-for="(item) in enums.companies" :key="item"
+                                           :label="item" :value="item">
+                                </el-option>
+                            </el-select>
+                        </template>
+                    </el-form-item>
+                    <el-form-item label="联系方式：">
+                        <el-input v-model="userInfo.phone" placehloder="11位电话号码"></el-input>
+                    </el-form-item>
+                    <el-form-item label="权限：">
+                        <template>
+                            <el-select v-model="userInfo.power" style="width: 100%">
+                                <el-option v-for="(poweritem) in enums.powers" :key="poweritem"
+                                           :label="poweritem" :value="poweritem">
+                                </el-option>
+                            </el-select>
+                        </template>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="danger" @click="createUser">确定</el-button>
+                        <el-button type="info" @click="lastActiveIndex">返回</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+    <!--初始化密码-->
+    <div v-if="activeIndex === '0-3'">
+        <el-card class="box-card" style="margin: 10px">
+            <div style="margin: 20px; width: 40%">
+                <el-form ref="form" label-position="left" label-width="100px">
+                    <el-form-item label="姓名:">
+                        <el-input v-model="userInfo.username" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱:">
+                        <el-input v-model="userInfo.email" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="danger" @click="resetPassword">重置</el-button>
+                        <el-button type="info" @click="lastActiveIndex">返回</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+    <!--修改信息-->
+    <div v-if="activeIndex === '0-4'">
+        <el-card class="box-card" style="margin: 10px">
+            <div style="margin: 20px; width: 40%">
+                <el-form ref="form" label-position="left" label-width="100px">
+                    <el-form-item label="姓名：">
+                        <el-input v-model="userInfo.username"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱：">
+                        <el-input v-model="userInfo.email" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="部门：">
+                        <template>
+                            <el-select v-model="userInfo.department" style="width: 100%">
+                                <el-option v-for="(item) in enums.companies" :key="item"
+                                           :label="item" :value="item">
+                                </el-option>
+                            </el-select>
+                        </template>
+                    </el-form-item>
+                    <el-form-item label="联系方式：">
+                        <el-input v-model="userInfo.cellphone" placeholder="11位手机号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="权限：">
+                        <template>
+                            <el-select v-model="userInfo.power" style="width: 100%">
+                                <el-option v-for="(item) in enums.powers" :key="item"
+                                           :label="item" :value="item">
+                                </el-option>
+                            </el-select>
+                        </template>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="danger" @click="changeUserInfo">修改</el-button>
+                        <el-button type="info" @click="lastActiveIndex">返回</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+    <!--企业信息审核-->
+    <div v-if="activeIndex === '1-0'">
+        <el-card class="box-card" style="margin: 10px">
+            <div slot="header" class="clearfix">
+                <span>企业信息审核</span>
+            </div>
+            <el-table :data="companies.items" style="width: 100%">
+                <el-table-column v-for="(colItem) in companies.cols" :key="colItem.prop"
+                                 :prop="colItem.prop" :label="colItem.label">
+                </el-table-column>
+                <el-table-column fixed="right" label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="medium" @click="setActiveIndex(2, 0, scope.row.company)">详情
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+    </div>
+    <!--证书信息审核-->
+    <div v-if="activeIndex === '1-1'">
+        <el-card class="box-card" style="margin: 10px">
+            <div slot="header" class="clearfix">
+                <span>证书信息审核</span>
+            </div>
+            <el-table :data="certificate.items" style="width: 100%">
+                <el-table-column v-for="(colItem) in certificate.cols" :key="colItem.prop"
+                                 :prop="colItem.prop" :label="colItem.label">
+                </el-table-column>
+                <el-table-column fixed="right" label="操作">
+                    <template slot-scope="scope">
+                        <a :href="path+scope.row.certificate" download="">下载</a>
+                        <el-button type="text" size="medium" @click="pass(scope.row.id)">通过
+                        </el-button>
+                        <el-button type="text" size="medium" @click="certifyReject(scope.row.id)">驳回
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+    </div>
+    <!--企业信息详情-->
+    <div v-if="activeIndex === '2-0'">
+        <el-card class="box-card" style="margin: 10px">
+            <div slot="header" class="clearfix">
+                <span>企业信息详情</span>
+            </div>
+            <div style="margin: 20px" class="text">姓名：{{companyInfo.username}}</div>
+            <div style="margin: 20px" class="text">企业名：{{companyInfo.company}}</div>
+            <div style="margin: 20px" class="text">信用代码：{{companyInfo.creditcode}}</div>
+            <div style="margin: 20px" class="text">认证信息：{{companyInfo.verifyinfo}}</div>
+            <div style="margin: 20px" class="text">营业执照：<img v-bind:src="img" /></div><!--{{companyInfo.license}}-->
+            <el-button style="margin: 20px" type="primary" @click="confirm">确认</el-button>
+            <el-button style="margin: 20px" type="primary" @click="companyReject">驳回</el-button>
+        </el-card>
+    </div>
+    <!--证书信息详情-->
+    <div v-if="activeIndex === '2-1'">
+        <el-card class="box-card" style="margin: 10px">
+            <div slot="header" class="clearfix">
+                <span>证书信息详情</span>
+            </div>
+<!--            <div style="margin: 20px" class="text">姓名：{{userInfo.username}}</div>-->
+<!--            <div style="margin: 20px" class="text">企业名：{{companyInfo.company}}</div>-->
+<!--            <div style="margin: 20px" class="text">信用代码：{{companyInfo.creditcode}}</div>-->
+<!--            <div style="margin: 20px" class="text">认证信息：{{companyInfo.verifyinfo}}</div>-->
+<!--            <div style="margin: 20px" class="text">营业执照：{{companyInfo.license}}</div>-->
+            <el-button style="margin: 20px" type="primary" @click="confirmverti">确认</el-button>
+        </el-card>
+    </div>
+</div>
+
+<script>
+    vue = new Vue({
+        el: '#vue',
+        data: {
+            menu: [
+                //     {
+                //     title: '部门配置',
+                //     icon: 'el-icon-data-line',
+                //     items: ['主页', '添加部门、组织']
+                // }, {
+                //     title: '节点配置',
+                //     icon: 'el-icon-money',
+                //     items: ['区块链配置']
+                // },
+                {
+                    title: '账户管理',
+                    icon: 'el-icon-user',
+                    items: ['个人信息', '修改密码', '添加新用户']
+                },
+                {
+                    title: '信息审核',
+                    icon: 'el-icon-check',
+                    items: ['企业信息审核','证书信息审核']
+                }
+            ],
+            activeIndex: '0-0',
+            active: 0,
+            index: 0,
+            indexStack: [],
+            img: '',
+            path: 'http://holer.cc:50143/verifyfile/',
+
+            enums: {
+                companies: [],
+                powers: ['管理人员','普通用户']
+            },
+            serverInfo: {
+                id: '',
+                scriptID: '',
+                scriptKey: '',
+                area: '',
+                channelName: '',
+                chaincodeName: '',
+                clusterId: '',
+            },
+            orgInfo: {
+                id: '',
+                peer: '',
+                orgName: '',
+            },
+
+            //用户账号管理
+            userTable: {
+                cols: [
+                    {label: '序号', prop: 'id'},
+                    {label: '姓名', prop: 'username'},
+                    {label: '邮箱', prop: 'email'},
+                    {label: '部门', prop: 'department'},
+                    {label: '联系方式', prop: 'cellphone'},
+                    {label: '权限', prop: 'power'},
+                    {label: '企业认证', prop: 'isverify'}
+                ],
+                items: []
+            },
+            userInfo: {
+                username: '',
+                email: '',
+                passwd: '',
+                cellphone: '',
+                department: '',
+                power: '',
+                state: 1,
+
+                //修改密码
+                oldpassword: '',
+                newpassword: '',
+                newpassword1: ''
+            },
+            // 企业信息
+            companies: {
+                cols: [
+                    {label: '序号',prop: 'id'},
+                    {label: '用户名', prop: 'username'},
+                    {label: '企业名', prop: 'company'}
+                ],
+                items: []
+            },
+            companyInfo: {
+                username: '',
+                email: '',
+                company: '',
+                creditcode: '',
+                verifyinfo: '',
+                license: '',
+                state: ''
+            },
+            // 证书信息
+            certificate: {
+                cols: [
+                    {label: '序号',prop: 'id'},
+                    {label: '用户名', prop: 'username'},
+                    {label: '企业名', prop: 'company'},
+                    {label: '证书类型', prop: 'filetype'},
+                    {label: '证书名', prop: 'certificate'}
+                ],
+                items: []
+            },
+            certificateInfo:{
+                id: '',
+                username: '',
+                company: '',
+                filetype: '',
+                certificate: ''
+            }
+        },
+
+        methods: {
+            logPage: function(){
+                window.location.href = '/login';
+            },
+            //退出登录
+            logout: function () {
+                axios.get("/user/logout").then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    window.location.href = "/login";
+                    this.$message({
+                        message: '登出成功',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.$message.error("注销异常"));
+            },
+            //下一个标签
+            next: function () {
+                if (this.active++ > 2) this.active = 0;
+            },
+            // 删除用户
+            deleteUser: function (email) {
+                axios.get("/user/delete", {
+                    params: {email: email}
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.userTable.items = this.userTable.items.filter(row => row.account !== account);
+                    this.$message({
+                        message: '删除用户成功',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.$message.error("删除用户请求异常"));
+            },
+            //加载用户
+            loadUserInfo: function (email) {
+                axios.get('/user/info', {
+                    params: {email: email}
+                }).then(resp => {
+                    let keys = Object.keys(resp.data);
+                keys.forEach(key => this.userInfo[key] = resp.data[key]);
+            }).catch(e => this.$message.error("获取用户信息失败"));
+            },
+            // 修改密码
+            changePassword: function () {
+                if (this.userInfo.newpassword === this.userInfo.newpassword1) {
+                    axios.get('/user/changePassword', {
+                        params: {
+                            email: this.userInfo.email,
+                            oldpassword: this.userInfo.oldpassword,
+                            newpassword: this.userInfo.newpassword
+                        }
+                    }).then(resp => {
+                        if (resp.data.hasOwnProperty('error')) {
+                        this.$message.error(resp.data['error']);
+                    } else {
+                        this.$message({
+                            message: '修改密码成功',
+                            type: 'success'
+                        })
+                    }
+                }).catch(e => this.$message.error("修改密码请求异常"));
+                } else {
+                    this.$message.error("确认密码与新密码不同");
+                }
+            },
+            // 创建新用户
+            createUser: function () {
+                axios.get('/user/create', {
+                    params: {
+                        email: this.userInfo.email,
+                        username: this.userInfo.username,
+                        department: this.userInfo.department,
+                        cellphone: this.userInfo.cellphone,
+                        power: this.userInfo.cellphone
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '创建新用户成功',
+                        type: 'success'
+                    });
+                }
+            }).catch(e => this.$message.error("创建用户请求异常"));
+            },
+            // 重置密码
+            resetPassword: function () {
+                axios.get('/user/resetPassword', {
+                    params: {
+                        email: this.userInfo.email
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '重置密码成功',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.$message.error("重置密码请求异常"));
+            },
+            // 修改用户信息
+            changeUserInfo: function () {
+                axios.get('user/changeUser', {
+                    params: this.userInfo
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '修改用户信息成功',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.message.error("修改用户信息请求异常"));
+            },
+            //加载用户信息
+            loadUserTable: function () {
+                axios.get('/user/employees')
+                    .then(resp => this.userTable.items = resp.data['list'])
+                    .catch(e => this.$message.error("加载用户列表异常"));
+            },
+            //加载公司信息审核表
+            loadCompanyTable: function () {
+                axios.get('/vertify/companytable')
+                    .then(resp => this.companies.items = resp.data['list'])
+                    .catch(e => this.$message.error("加载审核信息异常"));
+            },
+            loadCertifyTable: function () {
+                axios.get('/vertify/verifytable')
+                    .then(resp => this.certificate.items = resp.data['list'])
+                    .catch(e => this.$message.error("加载审核信息异常"));
+            },
+            //加载公司详细信息
+            loadCompanyInfo: function (company) {
+                axios.get('/vertify/companyinfo',{
+                    params: {
+                        email: this.companies.email,
+                        company: company
+                    }
+                }).then(resp => {
+                    let keys = Object.keys(resp.data);
+                keys.forEach(key => this.companyInfo[key] = resp.data[key]);
+                this.img = "/buslicense/"+this.companyInfo.license;
+                this.$message.error(this.img)
+            }).catch(e => this.$message.error("获取用户信息失败"));
+            },
+            //公司信息通过
+            confirm: function () {
+                axios.get('/vertify/confirm', {
+                    params: {
+                        email: this.companyInfo.email,
+                        state: '认证'
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '通过',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.message.error("同意请求异常"));
+            },
+            //企业信息驳回
+            companyReject: function () {
+                axios.get('/vertify/companyReject', {
+                    params: {
+                        email: this.companyInfo.email,
+                        state: '驳回'
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '驳回',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.message.error("同意请求异常"));
+            },
+            //证书信息通过
+            pass: function (id) {
+                axios.get('/submit/confirm', {
+                    params: {
+                        id: id,
+                        state: '认证'
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '通过',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.message.error("同意请求异常"));
+            },
+            //证书信息驳回
+            certifyReject: function (id) {
+                axios.get('/submit/certifyReject', {
+                    params: {
+                        id: id,
+                        state: '驳回'
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '通过',
+                        type: 'success'
+                    })
+                }
+            }).catch(e => this.message.error("同意请求异常"));
+            },
+            // 上一页
+            lastActiveIndex: function () {
+                this.activeIndex = this.indexStack.pop();
+            },
+            // 页面跳转
+            setActiveIndex: function (menuIndex, submenuIndex, attachment) {
+                let oldIndex = this.activeIndex;
+                let newIndex = menuIndex + '-' + submenuIndex;
+                switch (newIndex) {
+                    case '0-0':
+                        this.loadUserTable();
+                        break;
+                    case '0-1':
+                        axios.get('/user/current')
+                            .then(resp => this.loadUserInfo(resp.data['email']))
+                            .catch(e => this.$message.error("获取当前用户失败"));
+                        break;
+                    case '0-2':
+                        Object.keys(this.userInfo).forEach(key => this.userInfo[key] = '');
+                        break;
+                    case '0-3':
+                        this.loadUserInfo(attachment);
+                        break;
+                    case '0-4':
+                        if (attachment !== undefined) {
+                            Object.keys(this.userInfo).forEach(key => this.userInfo[key] = '');
+                            this.loadUserInfo(attachment);
+                        }
+                        break;
+                    case '1-0':
+                        this.loadCompanyTable();
+                        break;
+                    case '1-1':
+                        this.loadCertifyTable();
+                        break;
+                    case '2-0':
+                        if (attachment !== undefined) {
+                            this.loadCompanyInfo(attachment);
+                        }
+                        break;
+                    case '2-1':
+                }
+                this.indexStack.push(oldIndex);
+                this.activeIndex = newIndex;
+            },
+            // 创建新样本div
+            createButton: function () {
+                this.list.push({contactType: '', number: ''});
+                this.index++;
+            },
+            //删除样本div
+            deleteButton: function (i) {
+                if (this.index-- > 0) {
+                    this.list.splice(i, 1);  //删除index为i,位置的数组元素
+                }
+
+            }
+        }
+    });
+    vue.setActiveIndex(0, 0);
+</script>
+</body>
+</html>

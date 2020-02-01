@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>基于区块链的电子印章系统</title>
+    <style>
+        body {
+            background-image: linear-gradient(45deg, #7A88FF, #7AFFAF);
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body>
+<div id="vue">
+    <el-card class="box-card" style="margin: 10% 15% auto 55%;">
+        <div style="margin: 15px">
+            <el-form ref="form" label-position="left" label-width="80px">
+                <el-form-item label="账户：">
+                    <el-input v-model="account"></el-input>
+                </el-form-item>
+                <el-form-item label="密码：">
+                    <el-input v-model="password" show-password></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" style="width: 100%" @click="login">登录
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+    </el-card>
+</div>
+
+<script>
+    vue = new Vue({
+        el: '#vue',
+        data: {
+            account: '',
+            password: '',
+            authCode: '',
+            picture: ''
+        },
+        methods: {
+            loadPicture: function () {
+                axios.get('/user/authCode')
+                    .then(resp => this.picture = resp.data['authCodePicturePath'])
+                    .catch(e => alert("获取验证码失败"));
+            },
+            login: function () {
+                axios.get('/user/login', {
+                    params: {
+                        account: this.account,
+                        password: this.password,
+                    }
+                }).then(resp => {
+                    if (resp.data.hasOwnProperty('error')) {
+                        this.$message.error(resp.data['error']);
+                    } else {
+                        if (resp.data['result'] === '管理人员'){
+                            window.location.href = '/administrators';
+                        } else {
+                            window.location.href = '/index';
+                        }
+
+                    }
+                }).catch(e => this.$message.error("登陆发生错误"));
+            }
+        }
+    });
+    // vue.loadPicture();
+</script>
+</body>
+</html>

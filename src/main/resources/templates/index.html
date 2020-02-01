@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:text-align="http://www.w3.org/1999/xhtml"
+      xmlns:display="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"><!--http://www.w3.org/1999/xhtml-->
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>基于区块链的电子印章系统</title>
+</head>
+<body>
+<!--style="background:#4682B4; color:#000000"-->
+<div id="vue">
+    <!--导航-->
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-menu-item :plain="true" @click="setActiveIndex(0, 0)">
+            <template slot="title">
+                <i class="el-icon-house"></i>
+                <span>首页</span>
+            </template>
+        </el-menu-item>
+        <el-menu-item :plain="true" @click="download">
+            <template slot="title">
+                <i class="el-icon-download"></i>
+                <span>下载</span>
+            </template>
+        </el-menu-item>
+        <el-menu-item :plain="true" @click="setActiveIndex(0, 1)">
+            <template slot="title">
+                <i class="el-icon-circle-check"></i>
+                <span>验证</span>
+            </template>
+        </el-menu-item>
+        <el-submenu v-for="(menuItem, menuIndex) in menu" :key="menuIndex" :index="menuIndex + ''">
+            <template slot="title">
+                <i :class="menuItem.icon"></i>
+                <span>{{menuItem.title}}</span>
+            </template>
+            <el-menu-item v-for="(submenuItem, submenuIndex) in menuItem.items"
+                          :key="submenuIndex" :index="menuIndex + '-' + submenuIndex"
+                          @click="setActiveIndex(menuIndex+1, submenuIndex)">{{submenuItem}}
+            </el-menu-item>
+        </el-submenu>
+        <el-menu-item :plain="true" @click="register">
+            <template slot="title">
+                <i class="el-icon-circle-plus-outline"></i>
+                <span>注册</span>
+            </template>
+        </el-menu-item>
+        <el-menu-item :plain="true" v-if="isLogin === 0" @click="login">
+            <template slot="title">
+                <i class="el-icon-user"></i>
+                <span>登录</span>
+            </template>
+        </el-menu-item>
+        <el-menu-item :plain="true" v-if="isLogin === 1" @click="logout">
+            <template slot="title">
+                <i class="el-icon-close"></i>
+                <span>注销</span>
+            </template>
+        </el-menu-item>
+    </el-menu> <!--background-color="transparent"-->
+    <!--主页显示-->
+    <div v-if="activeIndex === '0-0'">
+        <!-- 轮播 -->
+        <template>
+            <el-carousel style="margin: 10px">
+                <el-carousel-item>
+                    <img th:src="@{/img/1415397.jpg}" alt="" style="width: 100%; height: 100%;">
+                </el-carousel-item>
+                <el-carousel-item>
+                    <img th:src="@{/img/1415398.jpg}" alt="" style="width: 100%; height: 100%;">
+                </el-carousel-item>
+                <el-carousel-item>
+                    <img th:src="@{/img/1415399.jpg}" alt="" style="width: 100%; height: 100%;">
+                </el-carousel-item>
+                <el-carousel-item>
+                    <img th:src="@{/img/1615547.jpg}" alt="" style="width: 100%; height: 100%;">
+                </el-carousel-item>
+            </el-carousel>
+        </template>
+        <el-card class="box-card" style="margin: 10px" shadow="never">
+            <br>
+            <span style="text-align: center;display:block;font-size:25px;">了解我们的服务</span>
+            <br><br><br>
+            <template>
+                <el-tabs v-model="activeName" @tab-click="handleClick" stretch="true">
+                    <el-tab-pane name="first" lazy="true">
+                        <span slot="label"><i class="el-icon-s-check"></i>盖章</span>
+                        此部分描述盖章功能的具体流程<br>
+                        1<br>2<br>3
+                    </el-tab-pane>
+                    <el-tab-pane name="second" background-color="#000000">
+                        <span slot="label"><i class="el-icon-setting"></i>制作电子印章</span>
+                        此部分描述制作电子印章时需要注意的部分<br>
+                        1<br>2<br>3
+                    </el-tab-pane>
+                    <el-tab-pane name="third">
+                        <span slot="label"><i class="el-icon-circle-check"></i>验证电子印章</span>
+                        此部分描述验证电子印章时需要的工作<br>
+                        1<br>2<br>3
+                    </el-tab-pane>
+                    <el-tab-pane label="关于我们" name="fourth">
+                        <div class="clock">
+                            <el-timeline>
+                                <el-timeline-item timestamp="2017" placement="top">
+                                    <el-card>
+                                        <h4>项目启动</h4>
+                                        <p>姚铭业 开始于2017。。。</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2018" placement="top">
+                                    <el-card>
+                                        <h4>任务分配</h4>
+                                        <p>姚明业</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2019" placement="top">
+                                    <el-card>
+                                        <h4>XXX</h4>
+                                        <p>xxxxxx</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2019" placement="top">
+                                    <el-card>
+                                        <h4>xxx</h4>
+                                        <p>xxxxxx</p>
+                                    </el-card>
+                                </el-timeline-item>
+                                <el-timeline-item timestamp="2019" placement="top">
+                                    <el-card>
+                                        <h4>xxx</h4>
+                                        <p>xxxxxx</p>
+                                    </el-card>
+                                </el-timeline-item>
+                            </el-timeline>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+        </el-card>
+        <br><br><br><br>
+        <!--        <div>-->
+        <!--            <el-card class="box-card" style="margin: 10px" shadow="never">-->
+        <!--                <div>-->
+        <!--                    <span style="font-size:15px;color:#ffffff">基于Linux的电子印章系统</span>-->
+        <!--                </div>-->
+        <!--                <br><br>-->
+        <!--                组长:姚铭业<br>设计:杜康镇<br>前端:王华彬<br>后端:姚铭业、王华彬<br>测试:雷富强-->
+        <!--            </el-card>-->
+        <!--        </div>-->
+        <footer class="footer" style="background: #333333">
+            <div class="container" dispaly="block">
+                <div class="footer-main">
+                    <h5 style="color: aliceblue">小组成员</h5>
+                    <p class="footer-main-content" style="font-size: 12px;color: azure">组长:姚铭业</p>
+                    <p class="footer-main-content" style="font-size: 12px;color: azure">王华彬</p>
+                    <p class="footer-main-content" style="font-size: 12px;color: azure">杜康镇</p>
+                    <p class="footer-main-content" style="font-size: 12px;color: azure">雷富强</p>
+                    <p class="footer-main-content" style="font-size: 12px;color: azure">滕宇生</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!--验证    class="box-card" style="margin: 10px" shadow="never" background-color="#000000"-->
+    <div v-if="activeIndex === '0-1'">
+        <el-card class="box-card" style="margin: 10px">
+            <el-upload
+                    ref="uploadExcel"
+                    class="upload-demo"
+                    action="/submit/uploadVerification"
+                    :limit=limitNum
+                    :auto-upload="true"
+                    accept=".pdf"
+                    :before-upload="beforeUploadFile"
+                    :on-change="fileChange"
+                    :on-exceed="exceedFile"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :file-list="fileList">
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">请上传PDF格式文件</div>
+            </el-upload>
+<!--            <template>-->
+<!--                <ul class="infinite-list" v-infinite-scroll="load" style="overflow:auto">-->
+<!--                    <li v-for="i in count" class="infinite-list-item">{{ i }}</li>-->
+<!--                </ul>-->
+<!--            </template>-->
+            <el-button @click="uploadFile">验证</el-button>
+<!--            <img v-bind:src="testimg" />-->
+        </el-card>
+    </div>
+    <!--企业信息提交-->
+    <div v-if="activeIndex === '1-0'">
+        <el-card class="box-card" style="margin: 10px">
+            <div style="margin: 20px; width: 40%">
+                <el-form ref="form" label-position="left" label-width="100px">
+                    <el-form-item label="邮箱：">
+                        <el-input v-model="companiesInfo.email" placeholder="(4-20个非中文字符)"></el-input>
+                    </el-form-item>
+                    <el-form-item label="企业名称：">
+                        <el-input v-model="companiesInfo.company" placeholder="(6-20个非中文字符)"></el-input>
+                    </el-form-item>
+                    <el-form-item label="信用代码：">
+                        <el-input v-model="companiesInfo.creditcode" placeholder="(统一社会信用代码)"></el-input>
+                    </el-form-item>
+                    <el-form-item label="认证信息：">
+                        <el-input v-model="companiesInfo.verifyinfo" placeholder="(10以下中文字符)"></el-input>
+                    </el-form-item>
+                    <el-form-item label="营业执照：">
+                        <el-upload
+                                ref="uploadExcel"
+                                class="upload-demo"
+                                action="/submit/uploadCompanyFile"
+                                :limit=limitNum
+                                :auto-upload="true"
+                                accept=".jpg,.png,.jpeg"
+                                :before-upload="beforecompanyFile"
+                                :on-change="fileChange"
+                                :on-exceed="exceedFile"
+                                :on-success="handleSuccess"
+                                :on-error="handleError"
+                                :file-list="fileList">
+                            <el-button size="small" type="primary">点击上传</el-button>
+                            <div slot="tip" class="el-upload__tip">请上传图片</div>
+                        </el-upload>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="danger" @click="loadCompanyInfo">确定</el-button>
+                        <el-button type="info" @click="lastActiveIndex">返回</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+    <!--证书信息提交-->
+    <div v-if="activeIndex === '1-1'">
+        <el-card class="box-card" style="margin: 10px">
+            <div style="margin: 20px; width: 40%">
+                <el-form ref="form" label-position="left" label-width="100px">
+                    <el-form-item label="证书类型：">
+                        <template>
+                            <el-select v-model="certifyInfo.filetype" style="width: 100%">
+                                <el-option v-for="(item) in enums.certifyType" :key="item"
+                                           :label="item" :value="item">
+                                </el-option>
+                            </el-select>
+                        </template>
+                    </el-form-item>
+                    <el-form-item label="证书：">
+                        <el-upload
+                                ref="uploadExcel"
+                                class="upload-demo"
+                                action="/submit/uploadVerifyFile"
+                                :limit=limitNum
+                                :auto-upload="true"
+                                accept=".cer,.crt"
+                                :before-upload="beforeCertifiFile"
+                                :on-change="fileChange"
+                                :on-exceed="exceedFile"
+                                :on-success="handleSuccess"
+                                :on-error="handleError"
+                                :file-list="fileList">
+                            <el-button size="small" type="primary">点击上传</el-button>
+                            <div slot="tip" class="el-upload__tip">请上传pem类型证书文件</div>
+                        </el-upload>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="danger" @click="loadCerifyInfo">确定</el-button>
+                        <el-button type="info" @click="lastActiveIndex">返回</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+</div>
+<script>
+    vue = new Vue({
+        el: '#vue',
+        data: {
+            menu: [
+                {
+                    title: '信息提交',
+                    icon: 'el-icon-upload2',
+                    items: ['企业信息提交','证书信息提交']
+                }
+            ],
+            // testimg: '/buslicense/79E1A34BB57607E9BFBF30494EB8DEE5.jpg',
+            limitNum: 1,
+            activeIndex: '0-0',
+            activeName: 'first',
+            indexStack: [],
+            filename: '',
+            isLogin: 0,
+            form: {
+                file: ''
+            },
+            fileList: [],
+            count: 0,
+
+            enums: {
+                companies: [],
+                certifyType: ['cer', 'crt']
+            },
+
+            //用户账号管理
+            userTable: {
+                cols: [
+                    {label: '序号', prop: 'id'},
+                    {label: '姓名', prop: 'name'},
+                    {label: '账户', prop: 'account'},
+                    {label: '部门', prop: 'company'},
+                    {label: '联系方式', prop: 'phone'}
+                ],
+                items: []
+            },
+            userInfo: {
+                id: '',
+                email: '',
+                username: '',
+                password: '',
+                cellphone: '',
+                department: ''
+            },
+            companiesInfo: {
+                email: '',
+                company: '',
+                creditcode: '',
+                verifyinfo: '',
+                license: ''
+            },
+            certifyInfo: {
+                certificate: '',
+                uid: '',
+                cid: '',
+                filetype: '',
+                state: ''
+            },
+            // 动态添加
+            list: [
+                {contactType: '', number: ''}
+            ],
+        },
+
+        methods: {
+            //标签页跳转
+            handleClick: function (tab, event) {
+                console.log(tab, event);
+            },
+            //登录
+            login: function () {
+                window.location.href = '/login';
+            },
+            //注册
+            register: function () {
+                window.location.href = '/register';
+            },
+            // 文件超出个数限制时的钩子
+            exceedFile: function(files, fileList) {
+                this.$notify.warning({
+                    title: '警告',
+                    message: "只能选择 ${this.limitNum} 个文件，当前共选择了 ${files.length + fileList.length} 个"
+                });
+            },
+            // 文件状态改变时的钩子
+            fileChange: function(file, fileList) {
+                console.log('change')
+                console.log(file)
+                this.form.file = file.raw
+                console.log(this.form.file)
+                console.log(fileList)
+            },
+            // 上传文件之前的钩子, 参数为上传的文件,若返回 false 或者返回 Promise 且被 reject，则停止上传
+            beforeUploadFile: function(file) {
+                console.log('before upload')
+                console.log(file)
+                let extension = file.name.substring(file.name.lastIndexOf('.')+1)
+                let size = file.size / 1024 / 1024
+                if(extension !== 'pdf') {
+                    this.$notify.warning({
+                        title: "警告",
+                        message: "只能上传pdf文件"
+                    });
+                }
+                if(size > 100) {
+                    this.$notify.warning({
+                        title: "警告",
+                        message: "文件大小不得超过10M"
+                    });
+                }
+            },
+            //公司营业执照上传前
+            beforecompanyFile: function (file) {
+                console.log('before upload')
+                console.log(file)
+                let extension = file.name.substring(file.name.lastIndexOf('.')+1)
+                let size = file.size / 1024 / 1024
+                if(extension !== 'png' && extension !== 'jpg' && extension !== 'jpeg') {
+                    this.$notify.warning({
+                        title: "警告",
+                        message: "只能上传图片文件"
+                    });
+                }
+                if(size > 100) {
+                    this.$notify.warning({
+                        title: "警告",
+                        message: "文件大小不得超过100M"
+                    });
+                }
+            },
+            //证书文件上传前
+            beforeCertifiFile: function (file) {
+                console.log('before upload')
+                console.log(file)
+                let extension = file.name.substring(file.name.lastIndexOf('.')+1)
+                let size = file.size / 1024 / 1024
+                if(extension !== 'cer' && extension !== 'crt') {
+                    this.$notify.warning({
+                        title: "警告",
+                        message: "只能上传pem格式的证书文件"
+                    });
+                }
+                if(size > 100) {
+                    this.$notify.warning({
+                        title: "警告",
+                        message: "文件大小不得超过100M"
+                    });
+                }
+            },
+            // 文件上传成功时的钩子
+            handleSuccess: function(res, file, fileList) {
+                this.filename = file.name;
+                this.$notify.success({
+                    title: "成功",
+                    message: "文件上传成功"
+                });
+            },
+            // 文件上传失败时的钩子
+            handleError: function(err, file, fileList) {
+                this.$notify.error({
+                    title: "错误",
+                    message: "文件上传失败"
+                });
+            },
+            uploadFile: function() {
+                axios.post('/submit/verification',{
+                    params: {
+                        id: this.userInfo.id//此处是用户的id，用于从数据库中找到文件的相关信息
+                    }
+                }).then(res => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '修改密码成功',
+                        type: 'success'
+                    })
+                }
+                }).catch(err => this.$message.error("修改密码请求异常"));
+            },
+            //上传公司信息
+            loadCompanyInfo: function (file) {
+                axios.get('/submit/companyInfo', {
+                    params: {
+                        email: this.companiesInfo.email,
+                        company: this.companiesInfo.company,
+                        creditcode: this.companiesInfo.creditcode,
+                        verifyinfo: this.companiesInfo.verifyinfo,
+                        filename: this.filename
+                    }
+                }).then(res => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '信息提交成功',
+                        type: 'success'
+                    })
+                }
+                }).catch(err => this.$message.error("上传信息请求异常"));
+            },
+            //上传证书文件
+            loadCerifyInfo: function (file) {
+                axios.get('/submit/certifyInfo', {
+                    params: {
+                        id: this.userInfo.id,
+                        email: this.userInfo.email,
+                        certificate: this.filename,
+                        filetype: this.certifyInfo.filetype
+                    }
+                }).then(res => {
+                    if (resp.data.hasOwnProperty('error')) {
+                    this.$message.error(resp.data['error']);
+                } else {
+                    this.$message({
+                        message: '信息提交成功',
+                        type: 'success'
+                    })
+                }
+            }).catch(err => this.$message.error("上传信息请求异常"));
+            },
+            //加载用户
+            loadUserInfo: function (email) {
+                axios.get('/user/info', {
+                    params: {email: email}
+                }).then(resp => {
+                    let keys = Object.keys(resp.data);
+                keys.forEach(key => this.userInfo[key] = resp.data[key]);
+            }).catch(e => this.$message.error("获取用户信息失败"));
+            },
+            // 上一页
+            lastActiveIndex: function () {
+                this.activeIndex = this.indexStack.pop();
+            },
+            // 页面跳转
+            setActiveIndex: function (menuIndex, submenuIndex, attachment) {
+                let oldIndex = this.activeIndex;
+                let newIndex = menuIndex + '-' + submenuIndex;
+                switch (newIndex) {
+                    case '0-0':
+                    case '0-1':
+                    case '1-0':
+                    case '1-1':
+                        axios.get('/user/current')
+                            .then(resp => this.loadUserInfo(resp.data['email']))
+                            .catch(e => this.$message.error("获取当前用户失败"));
+                        break;
+                }
+                this.indexStack.push(oldIndex);
+                this.activeIndex = newIndex;
+            }
+        }
+    });
+    vue.setActiveIndex(0, 0);
+</script>
+</body>
+</html>
+

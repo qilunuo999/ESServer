@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>基于区块链的电子印章系统</title>
+</head>
+<body>
+<div id="vue">
+    <div  style="background: #f5f6f7;">
+        <el-card class="box-card" style="margin:0% 32% 15% 32%;">
+            <div style="margin:5%">
+
+                <el-form ref="form">
+                    <h1 style="text-align: center">注册用户账号</h1>
+                    <el-form-item>
+                        <el-input v-model="username" placeholder="用户昵称"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-input v-model="email" placeholder="邮箱地址"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-input v-model="code" placeholder="验证码" style="width: 47%;float: left;"></el-input>
+                        <el-button style="width: 47%;float: right" @click="sendCode">发送验证码</el-button>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-input v-model="passwd" placeholder="密码" show-password></el-input>
+                    </el-form-item>
+                    <el-divider content-position="center">手机信息</el-divider>
+                    <el-form-item>
+                        <el-input v-model="cellphone" placeholder="手机号码"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" style="width: 100%" @click="register">注册
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-card>
+    </div>
+</div>
+
+<script>
+    vue = new Vue({
+        el: '#vue',
+        data: {
+            username: '',
+            email: '',
+            passwd: '',
+            authCode: '',
+            code: '',
+            cellphone: ''
+        },
+        methods: {
+            register: function() {
+                if (this.authCode === this.code) {
+                    axios.get('/user/register', {
+                        params: {
+                            username: this.username,
+                            email: this.email,
+                            passwd: this.passwd,
+                            cellphone: this.cellphone
+                        }
+                    }).then(resp => {
+                        if (resp.data.hasOwnProperty('error')) {
+                        this.$message.error("resp.data['error']")
+                    } else {
+                        this.$message({
+                            message: '登出成功',
+                            type: 'success'
+                        })
+                    }
+                }).catch(e => this.$message.error("注册异常"));
+                } else {
+                    this.$message.error("验证码错误");
+                }
+
+            },
+            sendCode: function () {
+                axios.get('/user/sendCode')
+                    .then(resp => this.authCode = resp.data['authCode'])
+                    .catch(e => this.$message.error("获取验证码失败"));
+            }
+        }
+    });
+    // vue.loadPicture();
+</script>
+
+</body>
+</html>
